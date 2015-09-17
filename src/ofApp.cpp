@@ -1,67 +1,39 @@
 #include "ofApp.h"
-
-const int BULLET_SIZE = 24;
-const int BULLET_COUNT = 100;
-
-class Bullet
-{
-public:
-    ofVec2f position;
-    ofVec2f direction;
-    bool active;
-    Bullet( )
-    {
-        active = true;
-        position = ofPoint( 300, 300 );
-        // direction = ofPoint( 5, 0 );
-        direction = ofPoint( ofRandom( 10 ) - 5, ofRandom( 10 ) - 5 );
-    }
-    Bullet( int x, int y, int dx, int dy )
-    {
-        active = true;
-        position = ofPoint( x, y );
-        direction = ofPoint( dx, dy );
-    }
-};
-
-namespace BullOps
-{
-void move( Bullet* b, double& deltaTime )
-{
-    if ( b != NULL )
-    {
-        b->position += b->direction * deltaTime;
-    }
-}
-void draw( Bullet* b, ofImage& img )
-{
-    if ( b != NULL )
-    {
-        img.draw( b->position, BULLET_SIZE, BULLET_SIZE );
-    }
-}
-}
+#include "Bullet.h"
 
 Bullet* bullets[BULLET_COUNT];
+
+double timer = 0.0d;
+int timerLastFired = 0;
+float bulletAngle = 0.0f;
 
 //--------------------------------------------------------------
 void ofApp::setup( )
 {
     ofSetWindowShape( 600, 600 );
     bullet.loadImage( "bullet.png" );
-    // for ( int i = BULLET_COUNT - 1; i >= 0; i-- )
-    // {
-    //     if ( i % 2 != 0 )
-    //     {
-    //         bullets[i] = new Bullet( );
-    //     }
-    // }
 }
 
 //--------------------------------------------------------------
 void ofApp::update( )
 {
     double deltaTime = ofGetLastFrameTime( );
+    // timer & bullet creation
+    timer += deltaTime;
+    if ( floor( timer * 10 ) > timerLastFired )
+    {
+        timerLastFired = floor( timer );
+        for ( int i = BULLET_COUNT - 1; i >= 0; i-- )
+        {
+            if ( bullets[i] == NULL )
+            {
+                bullets[i] = new Bullet( 300, 300, bulletAngle, 100.0f );
+                bulletAngle += 10;
+                break;
+            }
+        }
+    }
+    // moving bullets
     for ( int i = BULLET_COUNT - 1; i >= 0; i-- )
     {
         BullOps::move( bullets[i], deltaTime );
