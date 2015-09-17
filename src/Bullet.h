@@ -91,4 +91,22 @@ void drawAll( ofImage& img )
         draw( bullets[i], img );
     }
 }
+bool touching( ofVec2f pt, float radius )
+{
+    float testDist = ( BULLET_SIZE / 2 ) + radius;
+    for ( int i = BULLET_COUNT - 1; i >= 0; i-- )
+    {
+        if ( bullets[i] == NULL )
+        {
+            continue;
+        }
+        ofVec2f dist = bullets[i]->position - pt;
+        if ( dist.length( ) < testDist )
+        {
+            return true;
+            break;
+        }
+    }
+    return false;
+}
 }

@@ -11,6 +11,7 @@ public:
     float health;   // finite
     float stamina;  // regenerates
     float regenBlock;
+    bool hurt;
     Player( )
     {
         health = 100;
@@ -32,13 +33,18 @@ public:
             regenBlock -= deltaTime;
             regenBlock = max( 0.0f, regenBlock );
         }
+        if( hurt ){
+            health -= deltaTime * 50;
+            health = max( 0.0f, health );
+        }
+        hurt = false;
     }
     void move( int x, int y, double deltaTime )
     {
         ofVec2f diff = ofVec2f( x - position.x, y - position.y );
         direction = diff;
         direction.normalize( );
-        if ( ( diff.length( ) > 45 ) && stamina > 0 )
+        if ( ( diff.length( ) > 45 ) && ( stamina > 0 ) )
         {
             direction *= 90;
             stamina -= 30 * deltaTime;
@@ -52,13 +58,31 @@ public:
     }
     void draw( ofImage& img )
     {
-        ofSetColor( 200, 92, 92 );
-        img.draw( position, size, size );
-        ofSetColor( 200, 92, 92, 92 );
+        // aura
+        if ( hurt )
+        {
+            ofSetColor( 0, 92 );
+        }
+        else
+        {
+            ofSetColor( 200, 92, 92, 92 );
+        }
         img.draw( position, 90, 90 );  /// @todo magic number
+        // player
+        if ( hurt )
+        {
+            ofSetColor( 255 );
+        }
+        else
+        {
+            ofSetColor( 200, 92, 92 );
+        }
+        img.draw( position, size, size );
         //
+        ofSetColor( 192, 0, 32, 128 );
+        ofRect( 0, 0, health * 6, 20 );
         ofSetColor( 92, 200, 0, 128 );
-        ofRect( 0, 0, stamina * 6, 20 );
+        ofRect( 0, 20, stamina * 6, 20 );
     }
 };
 
@@ -89,6 +113,7 @@ void ofApp::update( )
     // player
     player->update( deltaTime );
     player->move( mouseX, mouseY, deltaTime );
+    player->hurt = BullOps::touching( player->position, player->size / 2 );
 }
 
 //--------------------------------------------------------------
