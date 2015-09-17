@@ -36,7 +36,13 @@ void ofApp::update( )
     // moving bullets
     for ( int i = BULLET_COUNT - 1; i >= 0; i-- )
     {
-        BullOps::move( bullets[i], deltaTime );
+        bool remove = BullOps::move( bullets[i], deltaTime );
+        if ( remove )
+        {
+            Bullet* bobo = bullets[i];
+            delete ( bobo );
+            bullets[i] = NULL;
+        }
     }
 }
 
