@@ -1,11 +1,9 @@
 #include "ofApp.h"
 #include "Bullet.h"
+#include "Spawner.h"
 
 Bullet* bullets[BULLET_COUNT];
-
-double timer = 0.0d;
-int timerLastFired = 0;
-float bulletAngle = 0.0f;
+Spawner spawner;
 
 //--------------------------------------------------------------
 void ofApp::setup( )
@@ -19,16 +17,14 @@ void ofApp::update( )
 {
     double deltaTime = ofGetLastFrameTime( );
     // timer & bullet creation
-    timer += deltaTime;
-    if ( floor( timer * 10 ) > timerLastFired )
+    Bullet* spawn = spawner.update( deltaTime );
+    if ( spawn != NULL )
     {
-        timerLastFired = floor( timer );
         for ( int i = BULLET_COUNT - 1; i >= 0; i-- )
         {
             if ( bullets[i] == NULL )
             {
-                bullets[i] = new Bullet( 300, 300, bulletAngle, 100.0f );
-                bulletAngle += 10;
+                bullets[i] = spawn;
                 break;
             }
         }
