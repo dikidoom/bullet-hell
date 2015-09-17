@@ -8,14 +8,17 @@ class Bullet
 public:
     ofVec2f position;
     ofVec2f direction;
+    bool active;
     Bullet( )
     {
+        active = true;
         position = ofPoint( 300, 300 );
         // direction = ofPoint( 5, 0 );
         direction = ofPoint( ofRandom( 10 ) - 5, ofRandom( 10 ) - 5 );
     }
     Bullet( int x, int y, int dx, int dy )
     {
+        active = true;
         position = ofPoint( x, y );
         direction = ofPoint( dx, dy );
     }
@@ -23,36 +26,45 @@ public:
 
 namespace BullOps
 {
-void move( Bullet& b )
+void move( Bullet* b, double& deltaTime )
 {
-    b.position += b.direction;
+    if ( b != NULL )
+    {
+        b->position += b->direction * deltaTime;
+    }
 }
-void draw( Bullet& b, ofImage& img )
+void draw( Bullet* b, ofImage& img )
 {
-    img.draw( b.position, BULLET_SIZE, BULLET_SIZE );
+    if ( b != NULL )
+    {
+        img.draw( b->position, BULLET_SIZE, BULLET_SIZE );
+    }
 }
 }
 
-Bullet bullets[BULLET_COUNT];
+Bullet* bullets[BULLET_COUNT];
 
 //--------------------------------------------------------------
 void ofApp::setup( )
 {
     ofSetWindowShape( 600, 600 );
     bullet.loadImage( "bullet.png" );
-    bullets[0] = Bullet( 300, 300, -5, 0 );
-    // bullets[0] = new Bullet();
+    // for ( int i = BULLET_COUNT - 1; i >= 0; i-- )
+    // {
+    //     if ( i % 2 != 0 )
+    //     {
+    //         bullets[i] = new Bullet( );
+    //     }
+    // }
 }
 
 //--------------------------------------------------------------
 void ofApp::update( )
 {
     double deltaTime = ofGetLastFrameTime( );
-    // bullets[0].direction.rotate( 90 * deltaTime );
-    // bullets[0].position += bullets[0].direction;
     for ( int i = BULLET_COUNT - 1; i >= 0; i-- )
     {
-        BullOps::move( bullets[i] );
+        BullOps::move( bullets[i], deltaTime );
     }
 }
 
