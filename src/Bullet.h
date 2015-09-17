@@ -28,6 +28,26 @@ public:
 
 namespace BullOps
 {
+Bullet* bullets[BULLET_COUNT];
+
+bool add( Bullet* b )
+{
+    for ( int i = BULLET_COUNT - 1; i >= 0; i-- )
+    {
+        if ( bullets[i] == NULL )
+        {
+            bullets[i] = b;
+            return true;
+        }
+    }
+    return false;
+}
+void remove( int i )
+{
+    Bullet* bobo = bullets[i];
+    delete ( bobo );
+    bullets[i] = NULL;
+}
 /**
  * @return True if bullet should be removed.
  */
@@ -46,11 +66,29 @@ bool move( Bullet* b, double& deltaTime )
     }
     return false;
 }
+void moveAll( double deltaTime )
+{
+    for ( int i = BULLET_COUNT - 1; i >= 0; i-- )
+    {
+        bool rem = move( bullets[i], deltaTime );
+        if ( rem )
+        {
+            remove( i );
+        }
+    }
+}
 void draw( Bullet* b, ofImage& img )
 {
     if ( b != NULL )
     {
         img.draw( b->position, BULLET_SIZE, BULLET_SIZE );
+    }
+}
+void drawAll( ofImage& img )
+{
+    for ( int i = BULLET_COUNT - 1; i >= 0; i-- )
+    {
+        draw( bullets[i], img );
     }
 }
 }

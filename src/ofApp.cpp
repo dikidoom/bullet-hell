@@ -2,14 +2,13 @@
 #include "Bullet.h"
 #include "Spawner.h"
 
-Bullet* bullets[BULLET_COUNT];
 Spawner spawner;
 
 //--------------------------------------------------------------
 void ofApp::setup( )
 {
     ofSetWindowShape( 600, 600 );
-    bullet.loadImage( "bullet.png" );
+    circle.loadImage( "bullet.png" );
 }
 
 //--------------------------------------------------------------
@@ -20,36 +19,17 @@ void ofApp::update( )
     Bullet* spawn = spawner.update( deltaTime );
     if ( spawn != NULL )
     {
-        for ( int i = BULLET_COUNT - 1; i >= 0; i-- )
-        {
-            if ( bullets[i] == NULL )
-            {
-                bullets[i] = spawn;
-                break;
-            }
-        }
+        BullOps::add( spawn );
     }
     // moving bullets
-    for ( int i = BULLET_COUNT - 1; i >= 0; i-- )
-    {
-        bool remove = BullOps::move( bullets[i], deltaTime );
-        if ( remove )
-        {
-            Bullet* bobo = bullets[i];
-            delete ( bobo );
-            bullets[i] = NULL;
-        }
-    }
+    BullOps::moveAll( deltaTime );
 }
 
 //--------------------------------------------------------------
 void ofApp::draw( )
 {
     ofSetColor( 64, 64, 200 );
-    for ( int i = BULLET_COUNT - 1; i >= 0; i-- )
-    {
-        BullOps::draw( bullets[i], bullet );
-    }
+    BullOps::drawAll( circle );
 }
 
 //--------------------------------------------------------------
