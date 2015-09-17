@@ -7,48 +7,72 @@ class Player
 public:
     ofVec2f position;
     ofVec2f direction;
-    int size;       // diameter (not radius)
-    float health;   // finite
-    float stamina;  // regenerates
-    float regenBlock;
-    bool hurt;
+    int size;          // diameter (not radius)
+    float health;      // finite
+    float stamina;     // regenerates
+    float catchBreath;  // 1 second pause before regenerating
+                       // stamina
+    bool blocking;        // blocking
+    bool hurting;         // visual aid when hit
     Player( )
     {
         health = 100;
         stamina = 100;
-        regenBlock = 0.0f;
+        catchBreath = 0.0f;
         size = 24;
-        position = ofVec2f( 300, 300 );
+        position = ofVec2f( 300, 200 );
         direction = ofVec2f( 0, 0 );
+    }
+    void hurt( float amount )
+    {
+        hurting = true;
+        health -= amount;
+        health = max( 0.0f, health );
+    }
+    void exhaust( float amount )
+    {
+        stamina -= amount;
+        catchBreath = 1.0f;
+        if( stamina < 0 ){
+            hurt( -1 * stamina );
+            stamina = 0;
+        }
     }
     void update( double deltaTime )
     {
-        if ( regenBlock == 0.0f )
+        if ( catchBreath == 0.0f )
         {
             stamina += deltaTime * 25;
             stamina = min( 100.0f, stamina );
         }
         else
         {
-            regenBlock -= deltaTime;
-            regenBlock = max( 0.0f, regenBlock );
+            catchBreath -= deltaTime;
+            catchBreath = max( 0.0f, catchBreath );
         }
-        if( hurt ){
-            health -= deltaTime * 50;
-            health = max( 0.0f, health );
+        if ( hurting )
+        {
+            // health -= deltaTime * 50;
+            // health = max( 0.0f, health );
+            // hurting is true for 1 frame (for visual effect)
+            hurting = false;
         }
-        hurt = false;
     }
     void move( int x, int y, double deltaTime )
     {
-        ofVec2f diff = ofVec2f( x - position.x, y - position.y );
+        if ( blocking )
+        {
+            return;
+        }
+        ofVec2f diff
+            = ofVec2f( x - position.x, y - position.y );
         direction = diff;
         direction.normalize( );
         if ( ( diff.length( ) > 45 ) && ( stamina > 0 ) )
         {
             direction *= 90;
             stamina -= 30 * deltaTime;
-            regenBlock = 1.0f;
+            catchBreath = 1.0f;
         }
         else
         {
@@ -59,9 +83,13 @@ public:
     void draw( ofImage& img )
     {
         // aura
-        if ( hurt )
+        if ( hurting )
         {
             ofSetColor( 0, 92 );
+        }
+        else if ( blocking )
+        {
+            ofSetColor( 92, 200, 92, 92 );
         }
         else
         {
@@ -69,16 +97,20 @@ public:
         }
         img.draw( position, 90, 90 );  /// @todo magic number
         // player
-        if ( hurt )
+        if ( hurting )
         {
             ofSetColor( 255 );
+        }
+        else if ( blocking )
+        {
+            ofSetColor( 92, 200, 92 );
         }
         else
         {
             ofSetColor( 200, 92, 92 );
         }
         img.draw( position, size, size );
-        //
+        // stats
         ofSetColor( 192, 0, 32, 128 );
         ofRect( 0, 0, health * 6, 20 );
         ofSetColor( 92, 200, 0, 128 );
@@ -103,7 +135,7 @@ void ofApp::setup( )
 void ofApp::update( )
 {
     double deltaTime = ofGetLastFrameTime( );
-    // timer & bullet creation
+    // timer & bullets
     Bullet* spawn = spawner.update( deltaTime );
     if ( spawn != NULL )
     {
@@ -113,15 +145,30 @@ void ofApp::update( )
     // player
     player->update( deltaTime );
     player->move( mouseX, mouseY, deltaTime );
-    player->hurt = BullOps::touching( player->position, player->size / 2 );
+    int touch = BullOps::firstTouch( player->position,
+                                     player->size / 2 );
+    if ( touch > -1 )
+    {
+        if ( player->blocking )
+        {
+            player->exhaust( 20 );
+            BullOps::reflect( player->position,
+                              player->size / 2, touch );
+        }
+        else
+        {
+            player->hurt( 20 );
+            BullOps::remove( touch );
+        }
+    }
 }
 
 //--------------------------------------------------------------
 void ofApp::draw( )
 {
-    ofSetColor( 64, 64, 200 );
     BullOps::drawAll( circle );
     player->draw( circle );
+    //
     ofSetColor( 0, 0, 0, 92 );
     ofLine( 300, 0, 300, 600 );
     ofLine( 0, 300, 600, 300 );
@@ -154,11 +201,13 @@ void ofApp::mouseDragged( int x, int y, int button )
 //--------------------------------------------------------------
 void ofApp::mousePressed( int x, int y, int button )
 {
+    player->blocking = true;
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased( int x, int y, int button )
 {
+    player->blocking = false;
 }
 
 //--------------------------------------------------------------
