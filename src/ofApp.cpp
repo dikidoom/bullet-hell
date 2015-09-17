@@ -1,14 +1,38 @@
 #include "ofApp.h"
-#include "Bullet.h"
-#include "Spawner.h"
 
-Spawner spawner;
+class Player
+{
+public:
+    ofVec2f position;
+    ofVec2f direction;
+    int size;
+    ofImage img;
+    Player( ofImage img )
+    {
+        this->img = img;
+        size = 32;
+        position = ofVec2f( 300, 300 );
+        direction = ofVec2f( 0, 0 );
+    }
+    void move( )
+    {
+        position += direction;
+    }
+    void draw( )
+    {
+        ofSetColor( 200, 92, 92 );
+        img.draw( position, size, size );
+    }
+};
+
+Player* player;
 
 //--------------------------------------------------------------
 void ofApp::setup( )
 {
     ofSetWindowShape( 600, 600 );
     circle.loadImage( "bullet.png" );
+    player = new Player( circle );
 }
 
 //--------------------------------------------------------------
@@ -21,7 +45,6 @@ void ofApp::update( )
     {
         BullOps::add( spawn );
     }
-    // moving bullets
     BullOps::moveAll( deltaTime );
 }
 

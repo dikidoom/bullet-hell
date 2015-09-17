@@ -10,19 +10,19 @@ public:
     ofVec2f direction;
     Bullet( )
     {
-        position = ofPoint( 300, 300 );
-        direction = ofPoint( ( ofRandom( 10 ) - 5 ) * 10,
+        position = ofVec2f( 300, 300 );
+        direction = ofVec2f( ( ofRandom( 10 ) - 5 ) * 10,
                              ( ofRandom( 10 ) - 5 ) * 10 );
     }
     Bullet( int x, int y, int dx, int dy )
     {
-        position = ofPoint( x, y );
-        direction = ofPoint( dx, dy );
+        position = ofVec2f( x, y );
+        direction = ofVec2f( dx, dy );
     }
     Bullet( int x, int y, float angle, float speed )
     {
-        position = ofPoint( x, y );
-        direction = ofPoint( cos( angle ) * speed, sin( angle ) * speed );
+        position = ofVec2f( x, y );
+        direction = ofVec2f( cos( angle ) * speed, sin( angle ) * speed );
     }
 };
 
