@@ -10,6 +10,7 @@ public:
     ofVec2f direction;  // normalized
     float speed;
     float ghosting;
+
     Bullet( )
     {
         speed = 100.0f;
@@ -19,6 +20,7 @@ public:
                              ( ofRandom( 10 ) - 5 ) * 10 )
                         .normalize( );
     }
+
     Bullet( int x, int y, int dx, int dy )
     {
         speed = 100.0f;
@@ -26,6 +28,7 @@ public:
         position = ofVec2f( x, y );
         direction = ofVec2f( dx, dy );
     }
+
     Bullet( int x, int y, float angle, float speed )
     {
         position = ofVec2f( x, y );
@@ -51,38 +54,50 @@ bool add( Bullet* b )
     }
     return false;
 }
+
 void remove( int i )
 {
     Bullet* bobo = bullets[i];
     delete ( bobo );
     bullets[i] = NULL;
 }
+
 /**
  * @return True if bullet should be removed.
  */
 bool move( Bullet* b, double& deltaTime )
 {
-    if ( b != NULL )
+    if ( b == NULL )
     {
-        b->position += b->direction * b->speed * deltaTime;
-        if ( ( b->position.x > ( 600 + BULLET_SIZE ) )
-             || ( b->position.x < ( 0 - BULLET_SIZE ) )
-             || ( b->position.y > ( 600 + BULLET_SIZE ) )
-             || ( b->position.y < ( 0 - BULLET_SIZE ) ) )
-        {
-            return true;
-        }
+        return false;
     }
+    b->position += b->direction * b->speed * deltaTime;
+    if ( ( b->position.x > ( 600 + BULLET_SIZE ) )
+         || ( b->position.x < ( 0 - BULLET_SIZE ) )
+         || ( b->position.y > ( 600 + BULLET_SIZE ) )
+         || ( b->position.y < ( 0 - BULLET_SIZE ) ) )
+    {
+        return true;
+    }
+    /* else if ( false ) */
+    /* { */
+        
+    /* } */
     return false;
 }
+
 void moveAll( double deltaTime )
 {
     for ( int i = BULLET_COUNT - 1; i >= 0; i-- )
     {
-        /* if ( bullets[i]->ghosting > 0 ) */
-        /* { */
-        /*     bullets[i]->ghosting -= deltaTime; */
-        /* } */
+        if ( bullets[i] == NULL )
+        {
+            continue;
+        }
+        if ( bullets[i]->ghosting > 0 )
+        {
+            bullets[i]->ghosting -= deltaTime;
+        }
         bool rem = move( bullets[i], deltaTime );
         if ( rem )
         {
@@ -90,6 +105,7 @@ void moveAll( double deltaTime )
         }
     }
 }
+
 void draw( Bullet* b, ofImage& img )
 {
     if ( b != NULL )
@@ -97,6 +113,7 @@ void draw( Bullet* b, ofImage& img )
         img.draw( b->position, BULLET_SIZE, BULLET_SIZE );
     }
 }
+
 void drawAll( ofImage& img )
 {
     ofSetColor( 64, 64, 200 );
@@ -105,8 +122,10 @@ void drawAll( ofImage& img )
         draw( bullets[i], img );
     }
 }
+
 #define DIR bullets[i]->direction
 #define POS bullets[i]->position
+
 /// @todo touching multiple bullets?
 int firstTouch( ofVec2f pt, float radius )
 {
@@ -137,12 +156,13 @@ int firstTouch( ofVec2f pt, float radius )
     }
     return -1;
 }
+
 void reflect( ofVec2f center, float radius, int i )
 {
     // not working: reflect at angle
-    //ofVec2f pointAtCenter = center - POS;
-    //float angle = DIR.angle( pointAtCenter );
-    //DIR.rotate( 180 - abs( angle * 2 ) );
+    // ofVec2f pointAtCenter = center - POS;
+    // float angle = DIR.angle( pointAtCenter );
+    // DIR.rotate( 180 - abs( angle * 2 ) );
     bullets[i]->ghosting = 0.2;
     DIR *= -1;
     // not working: pull bullets out of intersection
@@ -151,6 +171,7 @@ void reflect( ofVec2f center, float radius, int i )
     /* POS += DIR * ( depth / radius ); */
     // dir *= -1;
 }
+
 #undef dir
 #undef pos
 }

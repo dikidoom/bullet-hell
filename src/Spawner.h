@@ -23,7 +23,9 @@ public:
         if ( tfloor > timerLastFired )
         {
             timerLastFired = tfloor;
-            b = new Bullet( 300, 300, bulletAngle, 100.0f );
+            b = new Bullet(
+                300, 300, bulletAngle,
+                50.0f + ( ( timerLastFired % 7 ) * 10 ) );
             bulletAngle += PI / 12;
         }
         return b;
