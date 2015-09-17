@@ -1,8 +1,6 @@
 #pragma once
 
 #include "ofMain.h"
-#include "Bullet.h"
-#include "Spawner.h"
 
 class ofApp : public ofBaseApp
 {
@@ -22,5 +20,4 @@ public:
     void gotMessage( ofMessage msg );
 
     ofImage circle;
-    Spawner spawner;
 };
