@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 // composition order:
 // INPUTS:
 // dt -------------------------->|
@@ -13,13 +15,30 @@
 // carousel (in1, in2, ..., inn ): each next() switches b/w in1,
 // in2, ..., inn, in1, in2, ...)
 
+/// @todo pre-emptively stop `double` times from overflowing
+
+/// @todo should probably unify all streams so they are more
+/// readily composable.
+
 // how about: all streams return the same type?
 // e.g. bulletarray?
-// and take the same deltatime-argument (and just don't use it?)
+// and take & relate the deltatime-argument
+// (and just don't use it?)
 // then we can mix and match freely?
 
 // can Take/Count be called MultiPoll instead?
 
+// fuck: should each stream return an object <value, stream>?
+// so there's a StreamNext function that works on all streams
+// and any composing function returns a stream object
+// (although any stream having a `next` is almost the same?)
+
+/// @todo add helper functions, e.g.
+/// interval(args) -> return new IntervalStream(args) and
+/// take(args) -> return new TakeStream(args)
+
+/// @todo rename BulletStream to SingleBulletStream / ShotStream
+/// and use BulletStream as a Synonym for Stream< BullerArray* >
 
 // -------------------------------------------------------------
 // Most abstract Stream
@@ -45,7 +64,22 @@ public:
     T next( double deltaTime )
     {
         return next( );
-    }
+    };
+};
+
+// -------------------------------------------------------------
+/// Other times a Stream ONLY works WITH `deltaTime`
+/// so here's a default implementation bugging out on `next()`.
+template < typename T >
+class TimeStream : public Stream< T >
+{
+public:
+    TimeStream( ){};
+    T next( )
+    {
+        return NULL;
+    };
+    virtual T next( double deltaTime );
 };
 
 // -------------------------------------------------------------
@@ -72,18 +106,41 @@ public:
 };
 
 // -------------------------------------------------------------
+/// Return the same value for each call to `next()`.
+template < typename T >
+class ConstStream : public ItemStream< T >
+{
+private:
+    T n;
+
+public:
+    ConstStream( T n )
+        : n( n ){};
+    T next( )
+    {
+        return n;
+    };
+};
+
+// -------------------------------------------------------------
 /// Generates single `Bullet*`.
 class BulletStream : public ItemStream< Bullet* >
 {
 private:
-    Stream< float >* angles;
+    Stream< double >* angles;
+    Stream< double >* speeds;
 
 public:
-    BulletStream( Stream< float >* angleStream )
-        : angles( angleStream ){};
+    BulletStream( Stream< double >* angleStream )
+        : angles( angleStream )
+        , speeds( new ConstStream< double >( 50 ) ){};
+    BulletStream( double angle, double speed )
+        : angles( new ConstStream< double >( angle ) )
+        , speeds( new ConstStream< double >( speed ) ){};
     Bullet* next( )
     {
-        return new Bullet( 300, 300, angles->next( ), 50 );
+        return new Bullet( 300, 300, angles->next( ),
+                           speeds->next( ) );
     };
 };
 
@@ -107,12 +164,13 @@ public:
             b->add( stream->next( ) );
         }
         return b;
-    }
+    };
 };
 
 // -------------------------------------------------------------
-/// Calls `next()` on a given stream in defined intervals (using `deltaTime`).
-class IntervalStream : public Stream< BulletArray* >
+/// Calls `next()` on a given stream in defined intervals (using
+/// `deltaTime`).
+class IntervalStream : public TimeStream< BulletArray* >
 {
 private:
     double time;
@@ -126,10 +184,6 @@ public:
         , counter( 0 )
         , interval( ival )
         , stream( from ){};
-    BulletArray* next( )
-    {
-        return NULL;
-    }
     BulletArray* next( double deltaTime )
     {
         BulletArray* b = NULL;
@@ -141,5 +195,68 @@ public:
             b = stream->next( );
         }
         return b;
-    }
+    };
 };
+
+// -------------------------------------------------------------
+/// Invoke a set of streams in timed sequence.
+class SequenceStream : public TimeStream< BulletArray* >
+{
+private:
+    double time;
+    double repeatTime;
+    int sequenceCount;
+    double* startTimes;
+    double* endTimes;
+    Stream< BulletArray* >** streams;
+
+public:
+    SequenceStream( int sCount,
+                    double* sTimes,
+                    double* eTimes,
+                    Stream< BulletArray* >* ss[] )
+        : time( 0.0d )
+        , repeatTime( 0.0d )
+        , sequenceCount( sCount )
+        , startTimes( sTimes )
+        , endTimes( eTimes )
+        , streams( ss )
+    {
+        // adjust looping time
+        for ( int i = sequenceCount; i >= 0; i-- )
+        {
+            if ( endTimes[i] > repeatTime )
+            {
+                repeatTime = endTimes[i];
+            }
+        }
+    };
+    BulletArray* next( double deltaTime )
+    {
+        time += deltaTime;
+        if ( time > repeatTime )
+        {
+            time -= repeatTime;
+        }
+        BulletArray* b = NULL;
+        for ( int i = sequenceCount - 1; i >= 0; i-- )
+        {
+            if ( ( time >= startTimes[i] )
+                 && ( time <= endTimes[i] ) )
+            {
+                if ( b == NULL )
+                {
+                    b = streams[i]->next( deltaTime );
+                }
+                else
+                {
+                    b->add( streams[i]->next( deltaTime ) );
+                }
+            }
+        }
+        return b;
+    };
+};
+
+// -------------------------------------------------------------
+/// Use multiple streams at the same time.

@@ -9,7 +9,7 @@ public:
               0.2,
               new TakeStream(
                   3,
-                  new BulletStream( new IncStream< float >(
+                  new BulletStream( new IncStream< double >(
                       0, PI / 4 ) ) ) ) )
     {
     }

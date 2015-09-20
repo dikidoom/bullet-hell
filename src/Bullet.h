@@ -42,13 +42,24 @@ class BulletArray
 {
 public:
     int count;
-    Bullet* bullets[10];
+    Bullet* bullets[100];  /// @todo make dynamic
     BulletArray( )
         : count( 0 ){};
     void add( Bullet* b )
     {
         bullets[count++] = b;
-    }
+    };
+    void add( BulletArray* b )
+    {
+        if ( b == NULL )
+        {
+            return;
+        }
+        for ( int i = b->count - 1; i >= 0; i-- )
+        {
+            bullets[count++] = b->bullets[i];
+        }
+    };
 };
 
 namespace BullOps
