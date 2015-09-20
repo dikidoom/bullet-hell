@@ -1,5 +1,6 @@
 #include "ofApp.h"
 #include "Bullet.h"
+#include "Stream.h"
 #include "Spawner.h"
 #include "Player.h"
 
@@ -29,10 +30,13 @@ void ofApp::update( )
 {
     double deltaTime = ofGetLastFrameTime( );
     // timer & bullets
-    Bullet* spawn = spawner.update( deltaTime );
+    BulletArray* spawn = spawner.update( deltaTime );
     if ( spawn != NULL )
     {
-        BullOps::add( spawn );
+        for ( int i = spawn->count - 1; i >= 0; i-- )
+        {
+            BullOps::add( spawn->bullets[i] );
+        }
     }
     BullOps::moveAll( deltaTime );
     // player

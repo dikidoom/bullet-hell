@@ -21,13 +21,13 @@ public:
                         .normalize( );
     }
 
-    Bullet( int x, int y, int dx, int dy )
-    {
-        speed = 100.0f;
-        ghosting = 0;
-        position = ofVec2f( x, y );
-        direction = ofVec2f( dx, dy );
-    }
+    /* Bullet( int x, int y, int dx, int dy ) */
+    /* { */
+    /*     speed = 100.0f; */
+    /*     ghosting = 0; */
+    /*     position = ofVec2f( x, y ); */
+    /*     direction = ofVec2f( dx, dy ); */
+    /* } */
 
     Bullet( int x, int y, float angle, float speed )
     {
@@ -35,6 +35,19 @@ public:
         direction = ofVec2f( cos( angle ), sin( angle ) );
         this->speed = speed;
         ghosting = 0;
+    }
+};
+
+class BulletArray
+{
+public:
+    int count;
+    Bullet* bullets[10];
+    BulletArray( )
+        : count( 0 ){};
+    void add( Bullet* b )
+    {
+        bullets[count++] = b;
     }
 };
 
@@ -81,7 +94,7 @@ bool move( Bullet* b, double& deltaTime )
     }
     /* else if ( false ) */
     /* { */
-        
+
     /* } */
     return false;
 }
