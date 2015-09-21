@@ -21,13 +21,13 @@ public:
                         .normalize( );
     }
 
-    Bullet( int x, int y, int dx, int dy )
-    {
-        speed = 100.0f;
-        ghosting = 0;
-        position = ofVec2f( x, y );
-        direction = ofVec2f( dx, dy );
-    }
+    /* Bullet( int x, int y, int dx, int dy ) */
+    /* { */
+    /*     speed = 100.0f; */
+    /*     ghosting = 0; */
+    /*     position = ofVec2f( x, y ); */
+    /*     direction = ofVec2f( dx, dy ); */
+    /* } */
 
     Bullet( int x, int y, float angle, float speed )
     {
@@ -36,6 +36,30 @@ public:
         this->speed = speed;
         ghosting = 0;
     }
+};
+
+class BulletArray
+{
+public:
+    int count;
+    Bullet* bullets[100];  /// @todo make dynamic
+    BulletArray( )
+        : count( 0 ){};
+    void add( Bullet* b )
+    {
+        bullets[count++] = b;
+    };
+    void add( BulletArray* b )
+    {
+        if ( b == NULL )
+        {
+            return;
+        }
+        for ( int i = b->count - 1; i >= 0; i-- )
+        {
+            bullets[count++] = b->bullets[i];
+        }
+    };
 };
 
 namespace BullOps
@@ -81,7 +105,7 @@ bool move( Bullet* b, double& deltaTime )
     }
     /* else if ( false ) */
     /* { */
-        
+
     /* } */
     return false;
 }

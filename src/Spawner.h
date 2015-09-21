@@ -3,31 +3,22 @@
 class Spawner
 {
 public:
-    double timer;
-    int timerLastFired;
-    float bulletAngle;
+    Stream< BulletArray* >* stream;
     Spawner( )
-        : timer( 0.0d )
-        , timerLastFired( 0 )
-        , bulletAngle( 0.0f )
+        : stream( new IntervalStream(
+              0.2,
+              new TakeStream(
+                  3,
+                  new BulletStream( new IncStream< double >(
+                      0, PI / 4 ) ) ) ) )
     {
     }
     /**
-     * @return Bullet to spawn, NULL if not
+     * @return Bullets to spawn, NULL if not
      */
-    Bullet* update( double deltaTime )
+    BulletArray* update( double deltaTime )
     {
-        Bullet* b = NULL;
-        timer += deltaTime;
-        float tfloor = floor( timer * 7 );
-        if ( tfloor > timerLastFired )
-        {
-            timerLastFired = tfloor;
-            b = new Bullet(
-                300, 300, bulletAngle,
-                50.0f + ( ( timerLastFired % 7 ) * 10 ) );
-            bulletAngle += PI / 12;
-        }
+        BulletArray* b = stream->next( deltaTime );
         return b;
     }
 };
