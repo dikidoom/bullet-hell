@@ -1,7 +1,5 @@
 #pragma once
 
-#include <iostream>
-
 // composition order:
 // INPUTS:
 // dt -------------------------->|
@@ -11,7 +9,8 @@
 // |<-------------------------------- BulletArray*
 // OUTPUTS:
 
-// ???????? how to implement ????????
+// TODOS
+
 // carousel (in1, in2, ..., inn ): each next() switches b/w in1,
 // in2, ..., inn, in1, in2, ...)
 
@@ -28,7 +27,7 @@
 
 // can Take/Count be called MultiPoll instead?
 
-// fuck: should each stream return an object <value, stream>?
+// should each stream return an object <value, stream>?
 // so there's a StreamNext function that works on all streams
 // and any composing function returns a stream object
 // (although any stream having a `next` is almost the same?)
@@ -259,4 +258,4 @@ public:
 };
 
 // -------------------------------------------------------------
-/// Use multiple streams at the same time.
+/// @todo Use multiple streams at the same time.

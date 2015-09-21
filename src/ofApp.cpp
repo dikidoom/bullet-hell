@@ -17,14 +17,6 @@ Spawner spawner;
 Stream< BulletArray* >* streems[4];
 int streemIndex = 0;
 
-double foo[2] = {0.0d, 1.0d};  // start times
-double bar[2] = {2.0d, 3.0d};  // end times
-Stream< BulletArray* >* baz[2] = {
-    new IntervalStream(
-        0.25d, new TakeStream( 1, new BulletStream( 0, 50 ) ) ),
-    new IntervalStream(
-        0.25d,
-        new TakeStream( 1, new BulletStream( PI / 2, 50 ) ) )};
 //--------------------------------------------------------------
 void ofApp::setup( )
 {
@@ -64,7 +56,6 @@ void ofApp::update( )
 {
     double deltaTime = ofGetLastFrameTime( );
     // timer & bullets
-    // BulletArray* spawn = spawner.update( deltaTime );
     BulletArray* spawn
         = streems[streemIndex]->next( deltaTime );
     if ( spawn != NULL )
